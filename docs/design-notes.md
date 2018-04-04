@@ -40,7 +40,7 @@ that are available to consumers of that service. One or more agents will provide
 between agents and services can be dynamic (e.g., to respond to agents becoming unavailable or acting maliciously). The
 operations in a service contract are defined by *verbs* that can have pre- and post-conditions:
 
-``` python
+``` 
 service bookshop:
     pred in_stock(Book)
     pred cost(Book) -> Amount
@@ -61,7 +61,7 @@ bound in the pre-condition).
 
 An implementation of the bookshop service can be provided along the following lines:
 
-``` python
+``` 
 bookshop waterstones:
     -- Predicate definitions
     in_stock(Book) if ...
@@ -74,7 +74,7 @@ bookshop waterstones:
 
 An agent can make use of this service as follows:
 
-``` python
+``` 
     require bookshop(Shop), Shop:in_stock(some_book)
     Shop:buy(some_book, Cash)
 ```
@@ -86,7 +86,7 @@ bookshop is required, for instance finding one with a particular book in stock.
 In addition to this imperative service interface, agents can also use a more declarative goal-based approach to
 performing actions. For instance, the same can be achieved via the single command:
 
-``` python
+``` 
     achieve bought(self, some_book)
 ```
 
@@ -144,7 +144,7 @@ The first two forms of message are based on the predicate symbols that the recip
 free-form Dialog facts and queries. Imperative messages are based on verb symbols. Exclamatory messages are based on
 event symbols.
 
-``` python
+``` 
 to do_something(...):
     ...
 on some_event(...):
@@ -160,7 +160,7 @@ it more than the previous line. Declaration blocks (described later) begin with 
 that are indented more than the starting line. The block finishes before the next line that is indented only as much or
 less than the starting line. For example:
 
-``` python
+``` 
 person john:
     name -> “John”
     date_of_birth -> 1972-12-02
@@ -181,12 +181,7 @@ Dialog has a rich set of basic types:
 * Logical variables, starting with an underscore or capital letter: `_`, `Foo`,
 * Function symbols: `foo`, `father(john)`. These form rational trees (i.e., are potentially infinite structures) as in [Prolog II](http://prolog-heritage.org/en/ph20.html). 
 * Composite data types: lists/arrays `[1, 2, 3]` and sets `{1, 2, 3}` (conceptually treated as balanced trees, but implementations are free to use other implementations). Associative maps can be specified using a syntax like `{ foo -> 12, bar -> 13 }` but this is just sugar for a set of function symbols `{ foo(12), bar(13) }` as we shall soon see. 
-### Sentences
-Sentences are formed from predicate symbols much like they are in Prolog. There are three types of sentences:
-* **Declarative** sentences end with a full stop: `father_of(eliza, neil).`. The indentation-based syntax allows the full stop to be omitted. When present it must agree with the indentation, otherwise a syntax error occurs. 
-* **Interrogative** sentences end with a question mark and indicate a query: `father_of(eliza, X)?`. 
-* **Exclamatory** sentences end with an exclamation mark and indicate an event: `born(eliza)!`. 
-There is no imperative sentence type, although there are imperative language constructs. 
+
 ### Sugar
 There are some syntactic sugar beyond Prolog to make programming natural and enjoyable. Functions can be declared using an Erlang-like syntax:
 ```erlang
