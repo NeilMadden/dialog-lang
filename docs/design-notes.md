@@ -24,9 +24,9 @@ non-logical operators such as the *cut*, which can render a program with only an
 it is possible to write efficient and logical Prolog code, and variants such as Datalog or XSB's tabling show that
 alternative control strategies can lead to efficient evaluation of expressive declarative languages.
 
-In Dialog, we extend this ideal from algorithms to real-world programs with the equation (with apologies to Wirth):
+In Dialog, we extend this ideal from algorithms to real-world *agents* with the equation:
 
-    Program = Logic + Control + Interaction
+    Agent = Logic + Control + Interaction
 
 Here *interaction* captures interactions with users, other components (agents in Dialog) and the wider environment in
 which the program is situated. It is the messy stuff on the edges: user interfaces, networking, I/O and so on.
@@ -42,11 +42,13 @@ operations in a service contract are defined by *verbs* that can have pre- and p
 ``` 
 service bookshop:
     pred in_stock(Book)
-    pred cost(Book) -> Amount
+    func cost(Book) -> Amount
 
     verb buy(Book, Money):
         requires in_stock(Book), Money = cost(Book), sender(Customer)
         achieves bought(Customer, Book)
+    end
+end
 ```
 Here we have a fictitious service that defines a single operation for buying a book using some money. It has three
 pre-conditions:
@@ -69,6 +71,7 @@ bookshop waterstones:
     -- Action definitions
     to buy(Book, Money) ->
         ...
+end
 ```
 
 An agent can make use of this service as follows:
@@ -153,11 +156,7 @@ on some_event(...) ->
 ## Lexical details
 Source files are valid Markdown/CommonMark files. All Dialog code is either indented or fenced as per Markdown rules.
 
-Dialog unapologetically uses an indentation-based syntax, like Python or Haskell. You can use either tabs or spaces, but
-cannot mix the two in a single file: doing so results in a parse-time error. A line can be continued by simply indenting
-it more than the previous line. Declaration blocks (described later) begin with a colon and are then followed by lines
-that are indented more than the starting line. The block finishes before the next line that is indented only as much or
-less than the starting line. For example:
+
 
 ``` 
 person john:
