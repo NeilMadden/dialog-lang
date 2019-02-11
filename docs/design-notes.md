@@ -14,8 +14,7 @@ programming for the sheer fun of it.
 
 ## Philosophy
 
-In 1979, Robert Kowalski of Imperial College [famously articulated the dream of Prolog](https://www.doc.ic.ac.uk/~rak/papers/algorithm%20=%20logic%20+%20control.pdf)
-using the equation:
+In 1979, Robert Kowalski of Imperial College [famously articulated the dream of Prolog][1] using the equation:
 
     Algorithm = Logic + Control
 
@@ -68,7 +67,7 @@ bookshop waterstones:
     cost(Book) -> ...
 
     -- Action definitions
-    to buy(Book, Money):
+    to buy(Book, Money) ->
         ...
 ```
 
@@ -145,9 +144,9 @@ free-form Dialog facts and queries. Imperative messages are based on verb symbol
 event symbols.
 
 ``` 
-to do_something(...):
+to do_something(...) ->
     ...
-on some_event(...):
+on some_event(...) ->
     ...
 ```
 
@@ -167,6 +166,8 @@ person john:
     age(Now) -> Now:year - date_of_birth:year
 ```
 
+(Note: I flip-flop on this issue, sometimes preferring an explicit `end` marker.)
+
 ## Language Elements
 ### Basic types
 
@@ -174,7 +175,7 @@ Dialog has a rich set of basic types:
 * Arbitrary precision decimals: `1.23`, `42`, `-13e9`, plus hex notation: `0xFF`. A single numeric type for now, for
   simplicity.
 * Strings: `“Hello, World!”` – Unicode (UTF-8). Note that balanced “smart quotes” can be used (English-style only). It's
-  2018, we shouldn't have to be escaping quotes inside strings for lack of balanced quote characters. Single or double
+  2019, we shouldn't have to be escaping quotes inside strings for lack of balanced quote characters. Single or double
   quotes can be used to delimit strings, in both straight and "smart" forms.
 * [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) dates and times: `2018-04-04`, `2018-04-04T14:54:31Z`,
   `12:02:33.123` etc.
@@ -248,3 +249,4 @@ John:name // expands to name(John)
 Dialog supports passing functions and predicates as arguments and returning them. 
 First-class functions can be defined using the arrow syntax: `f(g(Y) -> Y+1, ...)`. Anonymous (but non-recursive) functions can then be defined using an anonymous functor: `f(_(Y) -> Y + 1, ...)`
 
+[1]: https://www.doc.ic.ac.uk/~rak/papers/algorithm%20=%20logic%20+%20control.pdf
