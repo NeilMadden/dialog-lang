@@ -156,16 +156,54 @@ on some_event(...) ->
 ## Lexical details
 Source files are valid Markdown/CommonMark files. All Dialog code is either indented or fenced as per Markdown rules.
 
+Dialog mostly follows Prolog conventions, but with some syntactic sugar. 
 
+The form `f(a,b) -> ...` expands into `f(a, b, X) if X = ...`, providing some sugar for functions definitions, but can also be used to define datatypes. 
+```
+tree -> empty 
+      | leaf(A) 
+      | branch(tree, tree).
+```
+Expands into:
+```
+tree(X) if X = empty
+         | X = leaf(A)
+         | X = branch(X0, X1), tree(X0), tree(X1).
 
 ``` 
+
+A convenient syntax is also provided for making a series of statements about a single object. For example, the following statements about a man called John:
+```
+person(john).
+name(john, “John”).
+date_of_birth(john, 1972-12-02).
+spouse(john, mary).
+```
+Can be written using the colon-block form:
+```
+person john:
+    name(“John”).
+    date_of_birth(1972-12-02).
+    spouse(mary).
+end
+```
+We can combine this with the function form just given and so have:
+```
+person john:
+    name -> “John”.
+    date_of_birth -> 1972-12-02.
+    spouse -> mary.
+end
+```
+
+
+```
 person john:
     name -> “John”
     date_of_birth -> 1972-12-02
     age(Now) -> Now:year - date_of_birth:year
+end
 ```
-
-(Note: I flip-flop on this issue, sometimes preferring an explicit `end` marker.)
 
 ## Language Elements
 ### Basic types
