@@ -8,9 +8,7 @@ properties of [Erlang](https://en.m.wikipedia.org/wiki/Erlang_%28programming_lan
 form at present, and there are large conceptual gaps still to be filled. 
 
 ## Aims
-Dialog is intended as a language to learn about programming, explore ideas, and have fun. It is not aimed at large team
-software engineering. It is squarely aimed at enthusiastic amateurs (and "off-duty" professionals) playing with
-programming for the sheer fun of it. 
+Dialog is an experimental language for exploring some new points in the programming language design space. It probably will never have a fully functioning implementation.
 
 ## Philosophy
 
@@ -30,9 +28,34 @@ In Dialog, we extend this ideal from algorithms to real-world *agents* with the 
 
 Here *interaction* captures interactions with users, other components (agents in Dialog) and the wider environment in
 which the program is situated. It is the messy stuff on the edges: user interfaces, networking, I/O and so on.
-Concurrency is about interaction, parallelism is a control strategy.
 
-## Overview Sketch
+Several agent-oriented programming languages already exist, but hopefully Dialog differs from them in pushing the core ideas a little bit further.
+
+## Overview
+
+
+
+### Declarative core
+
+Dialog aims, as far as possible, to stick to declarative programming. The core is therefore a declarative logic programming language, with the following features:
+
+* No features that lack a declarative, logical semantics
+* Syntactic sugar for functions and typical functional programming idioms
+* Arithmetic via constraints 
+* Strong negation and some form of nonmonotonic negation-as-failure, probably using the well-founded semantics. I'm also interested in exploring support for abduction.
+* A rich set of basic datatypes: unicode strings, arbitrary-precision integers (at least), lists, sets, maps/dictionaries, vectors/arrays/matrices, etc.
+* Support for DCGs or a similar parsing/grammar definition mechanism.
+
+Note: my Prolog knowledge is a little out of touch, so this will probably evolve as I learn what the state of the art is.
+
+This constitutes the "logic" part. The "control" part will allow specifying aspects of how queries are performed over this logical core, borrowing from relational databases and other techniques. This is even less worked out than the logic part, but will likely include:
+
+* 
+
+### Imperative shell
+
+
+## Some details
 
 A Dialog program consists of sets of *agents* collaborating to provide *services*. A service defines a set of operations
 that are available to consumers of that service. One or more agents will provide that service, and the relationship
@@ -165,6 +188,7 @@ tree -> empty
       | branch(tree, tree).
 ```
 Expands into:
+
 ```
 tree(X) if X = empty
          | X = leaf(A)
@@ -173,6 +197,7 @@ tree(X) if X = empty
 ``` 
 
 A convenient syntax is also provided for making a series of statements about a single object. For example, the following statements about a man called John:
+
 ```
 person(john).
 name(john, “John”).
@@ -180,6 +205,7 @@ date_of_birth(john, 1972-12-02).
 spouse(john, mary).
 ```
 Can be written using the colon-block form:
+
 ```
 person john:
     name(“John”).
@@ -188,6 +214,7 @@ person john:
 end
 ```
 We can combine this with the function form just given and so have:
+
 ```
 person john:
     name -> “John”.
