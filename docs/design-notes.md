@@ -33,7 +33,7 @@ Several agent-oriented programming languages already exist, but hopefully Dialog
 
 ## Overview
 
-
+NB: sections named with a hat tip to [Functional core, imperative shell](https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell).
 
 ### Declarative core
 
@@ -50,10 +50,116 @@ Note: my Prolog knowledge is a little out of touch, so this will probably evolve
 
 This constitutes the "logic" part. The "control" part will allow specifying aspects of how queries are performed over this logical core, borrowing from relational databases and other techniques. This is even less worked out than the logic part, but will likely include:
 
-* 
+* Ability to specify control strategies independently of logic
+* Support for parallel execution
+* Support for alternative search strategies, such as iterative deepening
+* Ability to specify indexing, tabling, etc
 
 ### Imperative shell
 
+At some point, all programming language have to let you interact with the world. Philosophically, Dialog makes this split:
+
+* Deciding *what to do* is best done in declarative code
+* Deciding *how to do it* is done imperatively
+
+So Dialog has an imperative shell that gets things done. Imperative code can call into declarative code to make decisions, but the reverse is not possible. This is similar to IO in Haskell, but enforced by the language rather than the type system. (Dialog is not statically typed. I like type systems, but that's not what I'm interested in for this language).
+
+The imperative part of Dialog is quite different to a normal procedural or OO language. Firstly, you don't directly execute actions in Dialog. Rather, a *method* in Dialog is a (pure) function that *returns* one or more commands to carry out. These commands are then executed by the runtime. As well as atomic commands, there is a basic set of the usual imperative control structures to allow compound commands to be created:
+
+    do Command; Command ... end
+    for each Var in Query ...
+    for some Var in Query ...
+    try Command on Signal -> Handler ... end
+
+and so on. This is deliberately quite a restricted set of things you can do. In particular, there are no unbounded loops. As well as executing such commands locally, an agent can also *send* commands to another agent, in which case they execute as an atomic transaction from the point of view of observers:
+
+    foo <- do
+        bar ...
+        bob ...
+        quux ...
+    end
+    
+where `foo` is the agent being sent the commands and `bar ...` etc are verbs provided by that agent. In this way, Dialog's commands are an instantiation of the Command Pattern popular in OO. They are data structures that can be examined, manipulated, logged, and sent over the network. You can pattern-match against them and transform them however you like.
+
+### Methods and contracts
+
+Agents declare the verbs that they provide using declarations like
+
+    verb goto(Destination)
+    
+They can then implement these with one or more method declarations:
+
+    to goto(Destination)
+        ...
+    end
+
+These methods can declare pre-conditions that are used to select an appropriate implementation:
+
+    to goto(Destination)
+        requires access_to(car)
+        ...
+    end
+
+In this case, the method will only be chosen if the access_to(car) predicate is satisfied. If it isn't then another method implementing the same verb will be chosen. If no methods are applicable then the command will fail.
+
+Methods can also declare post-conditions, using the `achieves` declaration:
+
+    to goto(Destination)
+        requires access_to(car)
+        achieves at(Destination)
+        ...
+    end
+
+If the method is executed and doesn't achieve the post-condition then that will cause a failure too.
+
+You can also attach pre- and post-conditions to verbs, in which case they apply to all methods implementing that verb.
+
+The `to` form is syntactic sugar for defining a special `to(Action, Commands)` relation. That selects commands based on the action being executed and any pre-conditions. Preconditions translate into normal conditions on this relation:
+
+    to(goto(Destination), Commands) :-
+        access_to(car),
+        Commands = ...
+    to(goto(...)) :- ...
+
+Thus action selection is normal back-tracking search, guided by pre-conditions. This is committed-choice though; once a method has been selected it is committed to and failures will cause the whole action to abort.
+
+### Teleoreactive programming
+
+You may have noticed that there was no conditional statements in the command language fragment I showed in the last section. This is deliberate. Instead of having complex if-then statements all over the place, decisions are handled by declarative code. The syntax of methods allows them to include conditions in the following form:
+
+    to goto(Destination)
+      when at(Destination) -> done
+      when at(Here), route(Here, Destination) -> drive(Here, Destination)
+      else -> fail "no route"
+    end
+
+But this isn't just a simple if-then-else chain with different syntax. Instead, agents implement a variant of Nils Nilsson's [Teleo-Reactive Programs](http://teleoreactiveprograms.net). When a method is selected the agent adopts it as an *intention* and keeps evaluating it until either it succeeds (post-conditions are satisfied) or fails. On each cycle, the agent scans through the list of conditions and evaluates the first one that is true. Conditions are queries against the declarative core of the agent.
+
+Intentions are like threads. Multiple intentions can be active at a time. If a method never succeeds or fails then it remains active forever, allowing maintenance tasks to be programmed.
+
+Intentions execute in a [turn-based fashion as in E](http://erights.org/elib/concurrency/turns.html). Conceptually, each agent is its own vat: calling other methods on the same agent happens synchronously, while sending messages to other agents is asynchronous. (I will probably ignore promises for now, until I find I need them; sending compound commands to other agents seems conceptually simpler and with a more easily understood semantics and concurrency story.
+
+### Goal-driven execution
+
+The pre- and post-conditions on methods and verbs can be used to perform classical STRIPS-like planning. (And maybe moving beyond STRIPS in future). An agent can execute the command
+
+    achieve at(some_destination)
+
+to activate goal-based execution. This will find verbs whose post-conditions match the goal, then recursively try to `achieve` all pre-conditions for those verbs, and so on until it finds a plan or gives up. If a plan is found then it is executed in the normal teleoreactive execution model described before. 
+
+### Event-driven execution
+
+`on Event -> Commands‘
+
+`foo <- event(...)!`
+
+### Services and multi-agent alliances
+
+Agents can advertise services within a vat. Agents can make acquaintances across vats (and distributed). These are always typed in terms of services. Service definitions include verbs with pre- and post-conditions. If an agent trusts another agent then `achieve` will consider verbs provided by that agent, resulting in multi-agent planning.
+
+Pre- and post-condition predicates are evaluated in the context of the agent providing the service, so queries may be sent to determine plan viability. 
+
+### RESTful capability security (RESTCaps)
 
 ## Some details
 
